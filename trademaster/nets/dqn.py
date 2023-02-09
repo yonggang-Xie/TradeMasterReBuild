@@ -18,7 +18,12 @@ class QNet(Net):
         super().__init__()
         self.net = build_mlp(dims=[state_dim, *dims, action_dim])
         self.explore_rate = explore_rate
-        self.action_dim = action_dim
+        self.action_dim = action_dim 
+        self.net.apply(self.init_weights)
+        
+        #uncomment to see weights
+#         for name, param in self.net.named_parameters():
+#             print(f"Layer: {name} | Size: {param.size()} | Values : {param[:2]} \n")       
 
     def forward(self, state: Tensor) -> Tensor:
         return self.net(state)  # Q values for multiple actions
@@ -29,3 +34,9 @@ class QNet(Net):
         else:
             action = torch.randint(self.action_dim, size=(state.shape[0], 1))
         return action
+     
+    def init_weights(self,m):
+        if isinstance(m, nn.Linear):
+            torch.nn.init.kaiming_uniform(m.weight)
+            m.bias.data.zero_()
+
